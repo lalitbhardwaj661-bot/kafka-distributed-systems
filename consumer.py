@@ -1,7 +1,29 @@
 import time
 import json
 import random
+import threading
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import os
 
+# 1. Render Port Requirement Fix (Background Dummy Web Server)
+class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(b"IoT Kafka Consumer Service is Running Live!")
+
+def run_dummy_server():
+    port = int(os.environ.get("PORT", 10000))
+    server_address = ('', port)
+    httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
+    print(f"Web server started on port {port}")
+    httpd.serve_forever()
+
+# Start Web Server in Background Thread for Render
+threading.Thread(target=run_dummy_server, daemon=True).start()
+
+# 2. Main Consumer Logic
 print("Starting IoT Temperature Monitor Consumer...")
 
 kafka_connected = False
